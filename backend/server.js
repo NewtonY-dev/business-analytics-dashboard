@@ -1,6 +1,5 @@
 import express from "express";
 import dotenv from "dotenv";
-import mongoose from "./db/mongo.js";
 import pool from "./db/mysql.js";
 import authRouter from "./routes/auth.js";
 import protectedRouter from "./routes/protected.js";
