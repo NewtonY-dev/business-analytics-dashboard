@@ -67,7 +67,24 @@ export const listSales = async (req, res) => {
   }
 };
 
-export const getSaleById = async (req, res) => {};
+export const getSaleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.execute(
+      "SELECT * FROM sales WHERE id = ? AND deleted_at IS NULL",
+      [Number(id)]
+    );
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Sale not found" });
+    }
+    return res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error("getSaleById error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 export const createSale = async (req, res) => {};
 

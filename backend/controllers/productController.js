@@ -47,7 +47,24 @@ export const listProducts = async (req, res) => {
   }
 };
 
-export const getProductById = async (req, res) => {};
+export const getProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.execute(
+      "SELECT * FROM products WHERE id = ? AND deleted_at IS NULL",
+      [Number(id)]
+    );
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+    }
+    return res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error("getProductById error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 export const createProduct = async (req, res) => {};
 
