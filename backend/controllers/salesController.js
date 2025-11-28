@@ -268,6 +268,34 @@ export const updateSale = async (req, res) => {
   }
 };
 
-export const deleteSale = async (req, res) => {};
+export const deleteSale = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const saleId = Number(id);
+    if (!saleId || Number.isNaN(saleId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid sale id" });
+    }
+
+    const [result] = await pool.execute(
+      "UPDATE sales SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL",
+      [saleId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Sale not found or already deleted" });
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Sale soft-deleted" });
+  } catch (err) {
+    console.error("deleteSale error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 export const exportSalesJson = async (req, res) => {};

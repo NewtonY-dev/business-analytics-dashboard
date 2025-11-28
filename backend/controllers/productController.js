@@ -189,4 +189,35 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-export const deleteProduct = async (req, res) => {};
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const productId = Number(id);
+    if (!productId || Number.isNaN(productId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid product id" });
+    }
+
+    const [result] = await pool.execute(
+      "UPDATE products SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL",
+      [productId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: "Product not found or already deleted",
+        });
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Product soft-deleted" });
+  } catch (err) {
+    console.error("deleteProduct error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
