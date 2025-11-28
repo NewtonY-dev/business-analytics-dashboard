@@ -104,6 +104,89 @@ export const createProduct = async (req, res) => {
   }
 };
 
-export const updateProduct = async (req, res) => {};
+export const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, category, price } = req.body;
+
+    const productId = Number(id);
+    if (!productId || Number.isNaN(productId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid product id" });
+    }
+
+    const fields = [];
+    const params = [];
+
+    if (name !== undefined) {
+      if (typeof name !== "string" || name.trim() === "") {
+        return res
+          .status(400)
+          .json({ success: false, message: "name must be a non-empty string" });
+      }
+      fields.push("name = ?");
+      params.push(name.trim());
+    }
+
+    if (category !== undefined) {
+      if (category === null) {
+        fields.push("category = ?");
+        params.push(null);
+      } else if (typeof category === "string") {
+        fields.push("category = ?");
+        params.push(category.trim() || null);
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "category must be a string or null",
+        });
+      }
+    }
+
+    if (price !== undefined) {
+      const parsedPrice = Number(price);
+      if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "price must be a non-negative number",
+        });
+      }
+      fields.push("price = ?");
+      params.push(parsedPrice);
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields provided to update",
+      });
+    }
+
+    const sql = `UPDATE products SET ${fields.join(
+      ", "
+    )} WHERE id = ? AND deleted_at IS NULL`;
+    params.push(productId);
+
+    const [result] = await pool.execute(sql, params);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found or already deleted",
+      });
+    }
+
+    const [rows] = await pool.execute(
+      "SELECT * FROM products WHERE id = ? AND deleted_at IS NULL",
+      [productId]
+    );
+    return res
+      .status(200)
+      .json({ success: true, message: "Product updated", data: rows[0] });
+  } catch (err) {
+    console.error("updateProduct error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 export const deleteProduct = async (req, res) => {};

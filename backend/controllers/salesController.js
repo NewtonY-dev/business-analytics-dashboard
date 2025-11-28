@@ -145,7 +145,128 @@ export const createSale = async (req, res) => {
   }
 };
 
-export const updateSale = async (req, res) => {};
+export const updateSale = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { transaction_id, user_id, product_id, amount, qty } = req.body;
+
+    const saleId = Number(id);
+    if (!saleId || Number.isNaN(saleId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid sale id" });
+    }
+
+    const fields = [];
+    const params = [];
+
+    if (transaction_id !== undefined) {
+      if (transaction_id === null) {
+        fields.push("transaction_id = ?");
+        params.push(null);
+      } else if (typeof transaction_id === "string") {
+        fields.push("transaction_id = ?");
+        params.push(transaction_id.trim() || null);
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "transaction_id must be a string or null",
+        });
+      }
+    }
+
+    if (user_id !== undefined) {
+      if (user_id === null) {
+        fields.push("user_id = ?");
+        params.push(null);
+      } else {
+        const parsedUser = Number(user_id);
+        if (Number.isNaN(parsedUser) || parsedUser <= 0) {
+          return res.status(400).json({
+            success: false,
+            message: "user_id must be a positive integer or null",
+          });
+        }
+        fields.push("user_id = ?");
+        params.push(parsedUser);
+      }
+    }
+
+    if (product_id !== undefined) {
+      if (product_id === null) {
+        fields.push("product_id = ?");
+        params.push(null);
+      } else {
+        const parsedProduct = Number(product_id);
+        if (Number.isNaN(parsedProduct) || parsedProduct <= 0) {
+          return res.status(400).json({
+            success: false,
+            message: "product_id must be a positive integer or null",
+          });
+        }
+        fields.push("product_id = ?");
+        params.push(parsedProduct);
+      }
+    }
+
+    if (amount !== undefined) {
+      const parsedAmount = Number(amount);
+      if (Number.isNaN(parsedAmount) || parsedAmount < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "amount must be a non-negative number",
+        });
+      }
+      fields.push("amount = ?");
+      params.push(parsedAmount);
+    }
+
+    if (qty !== undefined) {
+      const parsedQty = Number(qty);
+      if (
+        Number.isNaN(parsedQty) ||
+        !Number.isInteger(parsedQty) ||
+        parsedQty <= 0
+      ) {
+        return res
+          .status(400)
+          .json({ success: false, message: "qty must be a positive integer" });
+      }
+      fields.push("qty = ?");
+      params.push(parsedQty);
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields provided to update",
+      });
+    }
+
+    const sql = `UPDATE sales SET ${fields.join(
+      ", "
+    )} WHERE id = ? AND deleted_at IS NULL`;
+    params.push(saleId);
+
+    const [result] = await pool.execute(sql, params);
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Sale not found or already deleted" });
+    }
+
+    const [rows] = await pool.execute(
+      "SELECT * FROM sales WHERE id = ? AND deleted_at IS NULL",
+      [saleId]
+    );
+    return res
+      .status(200)
+      .json({ success: true, message: "Sale updated", data: rows[0] });
+  } catch (err) {
+    console.error("updateSale error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 export const deleteSale = async (req, res) => {};
 
