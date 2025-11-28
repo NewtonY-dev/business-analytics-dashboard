@@ -298,4 +298,60 @@ export const deleteSale = async (req, res) => {
   }
 };
 
-export const exportSalesJson = async (req, res) => {};
+export const exportSalesJson = async (req, res) => {
+  try {
+    const { search, startDate, endDate, product_id, user_id } = req.query;
+
+    const whereClauses = ["deleted_at IS NULL"];
+    const params = [];
+
+    if (search) {
+      whereClauses.push("transaction_id LIKE ?");
+      params.push(`%${search}%`);
+    }
+
+    if (product_id !== undefined) {
+      const pid = Number(product_id);
+      if (Number.isNaN(pid)) {
+        return res
+          .status(400)
+          .json({ success: false, message: "product_id must be a number" });
+      }
+      whereClauses.push("product_id = ?");
+      params.push(pid);
+    }
+
+    if (user_id !== undefined) {
+      const uid = Number(user_id);
+      if (Number.isNaN(uid)) {
+        return res
+          .status(400)
+          .json({ success: false, message: "user_id must be a number" });
+      }
+      whereClauses.push("user_id = ?");
+      params.push(uid);
+    }
+
+    if (startDate) {
+      whereClauses.push("created_at >= ?");
+      params.push(startDate);
+    }
+
+    if (endDate) {
+      whereClauses.push("created_at < ?");
+      params.push(endDate);
+    }
+
+    const whereSQL = whereClauses.length
+      ? "WHERE " + whereClauses.join(" AND ")
+      : "";
+    const sql = `SELECT * FROM sales ${whereSQL} ORDER BY created_at DESC`;
+
+    const [rows] = await pool.execute(sql, params);
+
+    return res.json({ success: true, total: rows.length, results: rows });
+  } catch (err) {
+    console.error("exportSalesJson error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};

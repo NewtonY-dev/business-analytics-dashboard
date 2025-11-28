@@ -39,6 +39,11 @@ router.delete(
   deleteSale
 );
 
-router.get("/exportSales", authenticateToken, exportSalesJson);
+router.get(
+  "/exportSales",
+  authenticateToken,
+  authorizeRole("admin"),
+  exportSalesJson
+);
 
 export default router;
