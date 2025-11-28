@@ -66,7 +66,43 @@ export const getProductById = async (req, res) => {
   }
 };
 
-export const createProduct = async (req, res) => {};
+export const createProduct = async (req, res) => {
+  try {
+    const { name, category, price } = req.body;
+
+    if (!name || price === undefined || price === null) {
+      return res
+        .status(400)
+        .json({ success: false, message: "name and price are required" });
+    }
+
+    const parsedPrice = parseFloat(price);
+    if (Number.isNaN(parsedPrice)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "price must be a number" });
+    }
+
+    const [result] = await pool.execute(
+      "INSERT INTO products (name, category, price) VALUES (?, ?, ?)",
+      [name, category || null, parsedPrice]
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "Product created",
+      data: {
+        id: result.insertId,
+        name,
+        category: category || null,
+        price: parsedPrice,
+      },
+    });
+  } catch (err) {
+    console.error("createProduct error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 export const updateProduct = async (req, res) => {};
 

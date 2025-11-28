@@ -86,7 +86,64 @@ export const getSaleById = async (req, res) => {
   }
 };
 
-export const createSale = async (req, res) => {};
+export const createSale = async (req, res) => {
+  try {
+    const { transaction_id, user_id, product_id, amount, qty } = req.body;
+
+    if (amount === undefined || amount === null) {
+      return res
+        .status(400)
+        .json({ success: false, message: "amount is required" });
+    }
+
+    const parsedAmount = parseFloat(amount);
+    if (Number.isNaN(parsedAmount)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "amount must be a number" });
+    }
+
+    const parsedQty = qty !== undefined && qty !== null ? parseInt(qty, 10) : 1;
+    if (Number.isNaN(parsedQty) || parsedQty <= 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "qty must be a positive integer" });
+    }
+
+    const [result] = await pool.execute(
+      "INSERT INTO sales (transaction_id, user_id, product_id, amount, qty) VALUES (?, ?, ?, ?, ?)",
+      [
+        transaction_id || null,
+        user_id !== undefined && user_id !== null ? Number(user_id) : null,
+        product_id !== undefined && product_id !== null
+          ? Number(product_id)
+          : null,
+        parsedAmount,
+        parsedQty,
+      ]
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "Sale created",
+      data: {
+        id: result.insertId,
+        transaction_id: transaction_id || null,
+        user_id:
+          user_id !== undefined && user_id !== null ? Number(user_id) : null,
+        product_id:
+          product_id !== undefined && product_id !== null
+            ? Number(product_id)
+            : null,
+        amount: parsedAmount,
+        qty: parsedQty,
+      },
+    });
+  } catch (err) {
+    console.error("createSale error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 export const updateSale = async (req, res) => {};
 
