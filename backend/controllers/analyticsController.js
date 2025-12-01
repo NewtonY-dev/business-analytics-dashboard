@@ -152,4 +152,84 @@ export const getSalesByPeriod = async (req, res) => {
   }
 };
 
-export const getTopProducts = async (req, res) => {};
+export const getTopProducts = async (req, res) => {
+  try {
+    const { from, to, limit = 10, sort = "revenue" } = req.query;
+
+    const now = new Date();
+    const defaultFrom = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
+
+    const parseDate = (s) => {
+      if (!s) return null;
+      const d = new Date(s);
+      return Number.isNaN(d.getTime()) ? null : d;
+    };
+
+    const fromDate = parseDate(from) || defaultFrom;
+    const toDateRaw = parseDate(to) || now;
+    if (fromDate.getTime() > toDateRaw.getTime()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "'from' must be <= 'to'" });
+    }
+
+    const parsedLimit = Number(limit);
+    if (
+      !Number.isInteger(parsedLimit) ||
+      parsedLimit <= 0 ||
+      parsedLimit > 50
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "limit must be an integer between 1 and 50",
+      });
+    }
+
+    const allowedSorts = ["revenue", "quantity"];
+    if (!allowedSorts.includes(sort)) {
+      return res.status(400).json({
+        success: false,
+        message: "sort must be 'revenue' or 'quantity'",
+      });
+    }
+
+    const toExclusive = new Date(toDateRaw.getTime() + 24 * 60 * 60 * 1000);
+
+    const fromParam = fromDate.toISOString().slice(0, 19).replace("T", " ");
+    const toParam = toExclusive.toISOString().slice(0, 19).replace("T", " ");
+
+    // safe mapping for ORDER BY (validated above)
+    const orderBy = sort === "quantity" ? "quantity" : "revenue";
+
+    const sql = `
+      SELECT
+        s.product_id AS productId,
+        p.name AS name,
+        COALESCE(SUM(s.amount * s.qty), 0) AS revenue,
+        COALESCE(SUM(s.qty), 0) AS quantity
+      FROM sales s
+      JOIN products p ON s.product_id = p.id
+      WHERE s.deleted_at IS NULL
+        AND p.deleted_at IS NULL
+        AND s.created_at >= ?
+        AND s.created_at < ?
+      GROUP BY s.product_id
+      ORDER BY ${orderBy} DESC
+      LIMIT ?
+    `;
+
+    const [rows] = await pool.execute(sql, [fromParam, toParam, parsedLimit]);
+
+    const results = rows.map((r) => ({
+      productId: Number(r.productId),
+      name: r.name,
+      revenue: Number(r.revenue),
+      quantity: Number(r.quantity),
+    }));
+
+    return res.json({ success: true, results });
+  } catch (err) {
+    console.error("getTopProducts error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
