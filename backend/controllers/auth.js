@@ -47,9 +47,16 @@ export const signup = async (req, res) => {
       [name, email, hashedPassword, "user"]
     );
 
+    const payload = { userId: results.insertId, email: email, role: "user" };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+
     res.status(201).json({
       success: true,
       message: "User created successfully",
+      token,
       data: {
         user: {
           id: results.insertId,

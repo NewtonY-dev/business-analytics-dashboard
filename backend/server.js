@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors"; 
 import pool from "./db/mysql.js";
 import authRouter from "./routes/auth.js";
 import protectedRouter from "./routes/protected.js";
@@ -9,6 +10,10 @@ import analyticsRouter from "./routes/analyticsRoutes.js";
 
 dotenv.config();
 const app = express();
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173", // Vite default port
+  credentials: true
+}));
 app.use(express.json()); // body parser
 
 const PORT = process.env.PORT || 5000;
