@@ -58,7 +58,7 @@ export function AuthProvider({ children }) {
     if (t) {
       const parsed = parseJwt(t);
       if (!isValidToken(parsed)) {
-        console.error("Invalid token provided");
+        console.log("Invalid token provided");
         return;
       }
 

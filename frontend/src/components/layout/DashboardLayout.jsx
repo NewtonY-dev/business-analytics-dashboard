@@ -1,5 +1,6 @@
 import { useAuth } from "../../contexts/AuthProvider";
 import "./dashboardLayout.css";
+import { Link } from "react-router-dom";
 
 function NavItem({ label, isActive = false, onClick }) {
   const className = isActive
@@ -19,7 +20,7 @@ export function DashboardLayout({ children, title = "Dashboard" }) {
   const logout =
     typeof auth.logout === "function"
       ? auth.logout
-      : () => console.warn("AuthProvider logout not available");
+      : () => console.log("AuthProvider logout not available");
 
   const isAdmin = user?.role === "admin";
 
@@ -44,7 +45,9 @@ export function DashboardLayout({ children, title = "Dashboard" }) {
             <div className="dashboard-nav-section-title">Admin</div>
             <div className="dashboard-nav-group">
               {/* TODO: Replace with real admin-only navigation items (e.g., /admin/analytics, /admin/users) */}
-              <NavItem label="Admin Analytics" />
+              <Link to="/admin" style={{ textDecoration: "none" }}>
+                <NavItem label="Admin Panel" />
+              </Link>
               <NavItem label="Management" />
             </div>
           </div>
