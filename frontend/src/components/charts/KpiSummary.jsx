@@ -1,5 +1,3 @@
-// TODO: Replace placeholder data with API response from GET /analytics/kpis
-
 const placeholderData = {
   totalSales: 1250,
   totalRevenue: 125000,

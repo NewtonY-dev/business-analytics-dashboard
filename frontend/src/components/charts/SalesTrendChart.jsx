@@ -1,7 +1,3 @@
-// Expected data shape: { results: [{ label: string, value: number }] }
-// label = date/period string, value = revenue amount
-// TODO: Replace placeholder data with API response from GET /analytics/salesByPeriod
-
 import {
   LineChart,
   Line,

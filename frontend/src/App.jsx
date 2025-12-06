@@ -7,6 +7,9 @@ import AdminPanel from "./pages/AdminPanel";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import DashboardLayout from "./components/layout/DashboardLayout";
+import KPIsPage from "./pages/KPIsPage";
+import SalesTrendPage from "./pages/SalesTrendPage";
+import TopProductsPage from "./pages/TopProductsPage";
 
 export default function App() {
   return (
@@ -20,6 +23,39 @@ export default function App() {
           <ProtectedRoute>
             <DashboardLayout>
               <Dashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/kpis"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout title="KPIs">
+              <KPIsPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/sales-trend"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout title="Sales Trend">
+              <SalesTrendPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/top-products"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout title="Top Products">
+              <TopProductsPage />
             </DashboardLayout>
           </ProtectedRoute>
         }

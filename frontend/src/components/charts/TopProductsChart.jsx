@@ -1,6 +1,3 @@
-// Expected data shape: { results: [{ productId: number, name: string, revenue: number, quantity: number }] }
-// TODO: Replace placeholder data with API response from GET /analytics/topProducts
-
 import {
   BarChart,
   Bar,
