@@ -21,9 +21,7 @@ export default function KPIsPage() {
         setKpiData(data);
       }
     } catch (err) {
-      setError(
-        err?.response?.data?.message || err.message || "Failed to fetch KPIs"
-      );
+      setError(err.message || "Failed to fetch KPIs");
     } finally {
       setLoading(false);
     }

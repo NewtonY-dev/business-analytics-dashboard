@@ -65,7 +65,9 @@ export default function App() {
         path="/admin"
         element={
           <AdminRoute>
+          <DashboardLayout>
             <AdminPanel />
+          </DashboardLayout>
           </AdminRoute>
         }
       />

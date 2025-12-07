@@ -111,3 +111,115 @@ export async function getTopProducts(params = {}) {
     };
   }
 }
+
+export async function createProduct(data) {
+  try {
+    const response = await api.post("/api/products/createProduct", data);
+    return response.data;
+  } catch (error) {
+    console.error("createProduct error:", error);
+    throw {
+      message:
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to create product",
+      status: error?.response?.status,
+    };
+  }
+}
+
+export async function updateProduct(id, data) {
+  try {
+    const response = await api.put(`/api/products/updateProduct/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("updateProduct error:", error);
+    throw {
+      message:
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to update product",
+      status: error?.response?.status,
+    };
+  }
+}
+
+export async function deleteProduct(id) {
+  try {
+    const response = await api.delete(`/api/products/deleteProduct/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("deleteProduct error:", error);
+    throw {
+      message:
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to delete product",
+      status: error?.response?.status,
+    };
+  }
+}
+
+export async function createSale(data) {
+  try {
+    const response = await api.post("/api/sales/createSale", data);
+    return response.data;
+  } catch (error) {
+    console.error("createSale error:", error);
+    throw {
+      message:
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to create sale",
+      status: error?.response?.status,
+    };
+  }
+}
+
+export async function updateSale(id, data) {
+  try {
+    const response = await api.put(`/api/sales/updateSale/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("updateSale error:", error);
+    throw {
+      message:
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to update sale",
+      status: error?.response?.status,
+    };
+  }
+}
+
+export async function deleteSale(id) {
+  try {
+    const response = await api.delete(`/api/sales/deleteSale/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("deleteSale error:", error);
+    throw {
+      message:
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to delete sale",
+      status: error?.response?.status,
+    };
+  }
+}
+
+export async function exportSales(params = {}) {
+  try {
+    const response = await api.get("/api/sales/exportSales", { params });
+    return response.data;
+  } catch (error) {
+    console.error("exportSales error:", error);
+    throw {
+      message:
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to export sales",
+      status: error?.response?.status,
+    };
+  }
+}

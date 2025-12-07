@@ -15,8 +15,8 @@ export default function AdminRoute({ children }) {
   if (!auth.isAuthenticated()) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  if (!auth.authorizeRole("admin")) {
-    return <Navigate to="/dashboard" replace />;
+  if (!auth || !auth.authorizeRole("admin")) {
+    return <Navigate to="/dashboard" replace />
   }
   return children;
 }
