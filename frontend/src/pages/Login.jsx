@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthProvider";
+import "./auth.css";
 
 export default function Login() {
   const auth = useAuth();
@@ -27,33 +28,57 @@ export default function Login() {
   };
 
   return (
-    <form onSubmit={submit}>
-      <h2>Login</h2>
-      {error && <div>{error}</div>}
-      <div>
-        <label>Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+    <div className="auth-container">
+      <div className="auth-card">
+        <h2 className="auth-title">Login</h2>
+
+        {error && <div className="auth-error">{error}</div>}
+
+        <form onSubmit={submit} className="auth-form">
+          <div className="auth-field">
+            <label htmlFor="email" className="auth-label">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={loading}
+              className="auth-input"
+            />
+          </div>
+
+          <div className="auth-field">
+            <label htmlFor="password" className="auth-label">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+              className="auth-input"
+            />
+          </div>
+
+          <button type="submit" disabled={loading} className="auth-button">
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+
+        <div className="auth-link-container">
+          Don't have an account?{" "}
+          <Link to="/signup" className="auth-link">
+            Create account
+          </Link>
+        </div>
       </div>
-      <div>
-        <label>Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-      <button type="submit" disabled={loading}>
-        {loading ? "Logging in..." : "Login"}
-      </button>
-      <div>
-        <Link to="/signup">Create account</Link>
-      </div>
-    </form>
+    </div>
   );
 }

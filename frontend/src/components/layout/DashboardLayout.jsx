@@ -1,21 +1,19 @@
 import { useAuth } from "../../contexts/AuthProvider";
 import "./dashboardLayout.css";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
-function NavItem({ label, isActive = false, onClick }) {
+function NavItem({ label, isActive = false }) {
   const className = isActive
     ? "dashboard-nav-item dashboard-nav-item--active"
     : "dashboard-nav-item";
 
-  return (
-    <div className={className} onClick={onClick}>
-      {label}
-    </div>
-  );
+  return <div className={className}>{label}</div>;
 }
 
 export function DashboardLayout({ children, title = "Dashboard" }) {
   const auth = useAuth() || {};
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith("/admin");
   const user = auth.user;
   const logout =
     typeof auth.logout === "function"
@@ -32,11 +30,30 @@ export function DashboardLayout({ children, title = "Dashboard" }) {
         <div>
           <div className="dashboard-nav-section-title">Main</div>
           <div className="dashboard-nav-group">
-            {/* TODO: Wire this to router's dashboard route (e.g., /dashboard) */}
-            <NavItem label="Overview" isActive />
-            {/* TODO: Replace with real navigation items for all authenticated users */}
-            <NavItem label="Sales" />
-            <NavItem label="Products" />
+            <Link to="/dashboard">
+              <NavItem
+                label="Overview"
+                isActive={location.pathname === "/dashboard"}
+              />
+            </Link>
+            <Link to="/dashboard/kpis">
+              <NavItem
+                label="KPIs"
+                isActive={location.pathname === "/dashboard/kpis"}
+              />
+            </Link>
+            <Link to="/dashboard/sales-trend">
+              <NavItem
+                label="Sales Trend"
+                isActive={location.pathname === "/dashboard/sales-trend"}
+              />
+            </Link>
+            <Link to="/dashboard/top-products">
+              <NavItem
+                label="Top Products"
+                isActive={location.pathname === "/dashboard/top-products"}
+              />
+            </Link>
           </div>
         </div>
 
@@ -44,11 +61,15 @@ export function DashboardLayout({ children, title = "Dashboard" }) {
           <div>
             <div className="dashboard-nav-section-title">Admin</div>
             <div className="dashboard-nav-group">
-              {/* TODO: Replace with real admin-only navigation items (e.g., /admin/analytics, /admin/users) */}
-              <Link to="/admin" style={{ textDecoration: "none" }}>
-                <NavItem label="Admin Panel" />
-              </Link>
-              <NavItem label="Management" />
+              {isAdminPage ? (
+                <Link to="/dashboard">
+                  <NavItem label="Dashboard" />
+                </Link>
+              ) : (
+                <Link to="/admin">
+                  <NavItem label="Admin Panel" />
+                </Link>
+              )}
             </div>
           </div>
         )}
@@ -72,7 +93,6 @@ export function DashboardLayout({ children, title = "Dashboard" }) {
         <header className="dashboard-header">
           <div className="dashboard-header-title">{title}</div>
           <div className="dashboard-header-right">
-            {/* TODO: Add small global actions or filters here if needed later */}
             {new Date().toLocaleDateString()}
           </div>
         </header>
